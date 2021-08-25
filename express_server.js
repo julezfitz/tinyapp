@@ -85,3 +85,10 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+app.post("/login", (req, res) => {
+  const username = req.body['username']; //gets the username from the form input
+  console.log(username);
+  res.cookie("username",username);
+  res.redirect("/urls");
+});
+
