@@ -60,6 +60,15 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls/:shortURL", (req, res) => {
+  console.log(req.body);
+  const shortURL = req.params.shortURL;
+  const newLongURL = req.body['change-name']; //gets the new long URL from the form input
+  urlDatabase[shortURL] = newLongURL; //assigns the new long URL to the exisiting database record for the shortURL
+  console.log(urlDatabase);
+  res.redirect(`/urls`);
+});
+
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   const shortURL = generateRandomString(); //Generates new tiny url
