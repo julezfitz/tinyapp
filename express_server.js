@@ -59,7 +59,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  // const currentUser = users[req.cookies["user_id"]]; 
+  // const currentUser = users[req.cookies["user_id"]];
   const templateVars = {
     username: req.cookies["user_id"],
     user: whatUser(req.cookies["user_id"]),
@@ -131,7 +131,7 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    // username: req.cookies["user_id"],
+    username: req.cookies["user_id"],
     user: whatUser(req.cookies["user_id"]),
   };
   res.render("registration", templateVars);
@@ -166,4 +166,12 @@ app.post("/register", (req, res) => {
     res.redirect("/urls");
   }
   console.log(`User database: ${users}`);
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = {
+    username: req.cookies["user_id"],
+    user: whatUser(req.cookies["user_id"]),
+  };
+  res.render("login", templateVars);
 });
