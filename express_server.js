@@ -26,6 +26,12 @@ const generateRandomString = function () {
   return randString;
 };
 
+//Lookup the user object of the user with their user_id cookie
+const whatUser = function(userID) {
+  const currentUser = users[userID];
+  return currentUser;
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -43,28 +49,36 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  // const currentUser = users[req.cookies["user_id"]]; 
   const templateVars = {
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
+    user: whatUser(req.cookies["user_id"]),
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = {
+    user: whatUser(req.cookies["user_id"]),
+    username: req.cookies["user_id"]
+  };
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  console.log("You deleted me!!!!");
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL]; //delete the item for which the button was pressed from database
-  console.log(urlDatabase);
   res.redirect(`/urls`);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = {
+    username: req.cookies["user_id"],
+    shortURL: req.params.shortURL,
+    user: whatUser(req.cookies["user_id"]),
+    longURL: urlDatabase[req.params.shortURL],
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -93,8 +107,8 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const cookieUsername = req.body['username']; //gets the username from the form input
-  res.cookie("username", cookieUsername);
+  const username = req.body['username']; //gets the username from the form input
+  // res.cookie("username", cookieUsername);
   res.redirect("/urls");
   console.log(req.cookies["username"]);
 });
@@ -106,7 +120,10 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = {
+    username: req.cookies["user_id"],
+    user: whatUser(req.cookies["user_id"])
+  };
   res.render("registration", templateVars);
 });
 
@@ -120,6 +137,6 @@ app.post("/register", (req, res) => {
     "password": newPassword
   };
   console.log(users);
-  res.cookie("username", newID);
+  res.cookie("user_id", newID);
   res.redirect("/urls");
 });
