@@ -27,9 +27,19 @@ const generateRandomString = function () {
 };
 
 //Lookup the user object of the user with their user_id cookie
-const whatUser = function(userID) {
+const whatUser = function (userID) {
   const currentUser = users[userID];
   return currentUser;
+};
+
+//Check if an email already exists
+const emailExists = function (email) {
+  for (const key in users) {
+    console.log(users[key]);
+    if (users[key]["email"] === email) {
+      return true;
+    }
+  }
 };
 
 app.get("/", (req, res) => {
@@ -121,22 +131,39 @@ app.post("/logout", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["user_id"],
-    user: whatUser(req.cookies["user_id"])
+    // username: req.cookies["user_id"],
+    user: whatUser(req.cookies["user_id"]),
   };
   res.render("registration", templateVars);
 });
 
 app.post("/register", (req, res) => {
   const newID = generateRandomString();
+  if (!(req.body['password']) || !(req.body['email'])) {
+    res.status(400);
+    const templateVars = {
+      error: 'Error. Please enter an email and password'
+    };
+    res.render("registration", templateVars);
+  }
   const newPassword = req.body['password'];
   const newEmail = req.body['email'];
-  users[newID] = {
-    "id": newID,
-    "email": newEmail,
-    "password": newPassword
-  };
-  console.log(users);
-  res.cookie("user_id", newID);
-  res.redirect("/urls");
+
+  if (users && emailExists(newEmail)) {
+    res.status(400);
+    const templateVars = {
+      error: 'Error. An account already exists with this email address'
+    };
+    res.render("registration", templateVars);
+  } else {
+
+    users[newID] = {
+      "id": newID,
+      "email": newEmail,
+      "password": newPassword
+    };
+    res.cookie("user_id", newID);
+    res.redirect("/urls");
+  }
+  console.log(`User database: ${users}`);
 });

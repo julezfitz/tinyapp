@@ -11,6 +11,9 @@
 <body>
   <main style="margin: 1em;">
     <%- include('partials/_header') %>
+    <% if(typeof error != "undefined"){ %>
+      <p class="font-weight-bold" style = "margin-top: 10px; color: red"><%= error %></p>
+    <% } %>
       <form class="form" action="/register" method="POST">
         <div class="form-group" style = "margin-top: 20px;">
         <label for = "email">Please enter your email address:</label>
