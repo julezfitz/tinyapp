@@ -11,18 +11,18 @@
 <body>
   <main style="margin: 1em;">
     <%- include('partials/_header') %>
-    <h4 style = "margin-top: 15px;">Create A New Account</h4>
+    <h4 style = "margin-top: 15px;">Create Account</h4>
     <% if(typeof error != "undefined"){ %>
       <p class="font-weight-bold" style = "margin-top: 10px; color: red"><%= error %></p>
     <% } %>
       <form class="form" action="/register" method="POST">
         <div class="form-group" style = "margin-top: 20px;">
         <label for = "email">Please enter your email address:</label>
-        <input type="email" style = "width: 35%" class="form-control" name="email" style="padding:10px" placeholder="example@email.com">
+        <input type="email" style = "width: 35%" class="form-control" name="email" style="padding:10px" placeholder="enter email">
         </div>
         <div class = "form-group">
         <label for = "password">Create your password</label>
-        <input type="password" style = "width: 35%" class="form-control" name="password" style="padding:10px">
+        <input type="password" style = "width: 35%" class="form-control" name="password" style="padding:10px" placeholder="password">
         </div>
         <button type="submit" class="btn btn-outline-primary" style="margin-left:10px">Register</button>
       </form>

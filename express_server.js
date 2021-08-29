@@ -35,7 +35,6 @@ const whatUser = function (userID) {
 //Lookup a user by their email address and return that user object
 const getUserByEmail = function (email) {
   for (const key in users) {
-    console.log(users[key]);
     if (users[key]["email"] === email) {
       return users[key];
     }
@@ -59,7 +58,6 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  // const currentUser = users[req.cookies["user_id"]];
   const templateVars = {
     userID: req.cookies["userID"],
     user: whatUser(req.cookies["userID"]),
@@ -93,26 +91,20 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  console.log(req.body);
   const shortURL = req.params.shortURL;
   const newLongURL = req.body['change-name']; //gets the new long URL from the form input
   urlDatabase[shortURL] = newLongURL; //assigns the new long URL to the exisiting database record for the shortURL
-  console.log(urlDatabase);
   res.redirect(`/urls`);
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
   const shortURL = generateRandomString(); //Generates new tiny url
   urlDatabase[shortURL] = req.body.longURL; //Adds it to the database
-  console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  console.log(req.params.shortURL);
   const longURL = urlDatabase[req.params.shortURL]; //Looks up long URL from database
-  console.log(longURL);
   res.redirect(longURL);
 });
 
@@ -143,7 +135,6 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("userID");
-  console.log("cookie cleared!");
   res.redirect("/urls");
 });
 
