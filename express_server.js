@@ -26,7 +26,7 @@ const generateRandomString = function () {
   return randString;
 };
 
-//Lookup the user object of the user with their user_id cookie
+//Lookup the user object of the user with their userID cookie
 const whatUser = function (userID) {
   const currentUser = users[userID];
   return currentUser;
@@ -61,8 +61,8 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   // const currentUser = users[req.cookies["user_id"]];
   const templateVars = {
-    username: req.cookies["user_id"],
-    user: whatUser(req.cookies["user_id"]),
+    userID: req.cookies["userID"],
+    user: whatUser(req.cookies["userID"]),
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
@@ -70,8 +70,8 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: whatUser(req.cookies["user_id"]),
-    username: req.cookies["user_id"]
+    user: whatUser(req.cookies["userID"]),
+    userID: req.cookies["userID"]
   };
   res.render("urls_new", templateVars);
 });
@@ -84,9 +84,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-    username: req.cookies["user_id"],
+    userID: req.cookies["userID"],
     shortURL: req.params.shortURL,
-    user: whatUser(req.cookies["user_id"]),
+    user: whatUser(req.cookies["userID"]),
     longURL: urlDatabase[req.params.shortURL],
   };
   res.render("urls_show", templateVars);
@@ -119,31 +119,38 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/login", (req, res) => {
   const loginEmail = req.body['email'];
   const user = getUserByEmail(loginEmail);   //Lookup the current user
+  let templateVars;
 
   if (user) {
     const loginPassword = req.body['password'];
     if (user.password === loginPassword) {
-      res.cookie("user_id", user.id);
+      res.cookie("userID", user.id); //Set cookie to the user's id
       return res.redirect("/urls");
+    } else {
+      res.status(403);
+      templateVars = {
+        error: 'Error. Incorrect password'
+      };
     }
+  } else {
+    res.status(403);
+    templateVars = {
+      error: 'Error. An account with this email does not exist'
+    };
   }
-  res.status(403);
-  const templateVars = {
-    error: 'Error. User email and password did not match'
-  };
-  res.render("login", templateVars);
+  res.render("login", templateVars); //render the login page with the error message
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("userID");
   console.log("cookie cleared!");
   res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["user_id"],
-    user: whatUser(req.cookies["user_id"]),
+    userID: req.cookies["userID"],
+    user: whatUser(req.cookies["userID"]),
   };
   res.render("registration", templateVars);
 });
@@ -174,7 +181,7 @@ app.post("/register", (req, res) => {
       "email": newEmail,
       "password": newPassword
     };
-    res.cookie("user_id", newID);
+    res.cookie("userID", newID);
     res.redirect("/urls");
   }
   console.log(`User database: ${users}`);
@@ -182,8 +189,8 @@ app.post("/register", (req, res) => {
 
 app.get("/login", (req, res) => {
   const templateVars = {
-    username: req.cookies["user_id"],
-    user: whatUser(req.cookies["user_id"]),
+    userID: req.cookies["userID"],
+    user: whatUser(req.cookies["userID"]),
   };
   res.render("login", templateVars);
 });
