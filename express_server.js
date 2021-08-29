@@ -32,12 +32,12 @@ const whatUser = function (userID) {
   return currentUser;
 };
 
-//Check if an email already exists
-const emailExists = function (email) {
+//Lookup a user by their email address and return that user object
+const getUserByEmail = function (email) {
   for (const key in users) {
     console.log(users[key]);
     if (users[key]["email"] === email) {
-      return true;
+      return users[key];
     }
   }
 };
@@ -117,10 +117,21 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body['username']; //gets the username from the form input
-  // res.cookie("username", cookieUsername);
-  res.redirect("/urls");
-  console.log(req.cookies["username"]);
+  const loginEmail = req.body['email'];
+  const user = getUserByEmail(loginEmail);   //Lookup the current user
+
+  if (user) {
+    const loginPassword = req.body['password'];
+    if (user.password === loginPassword) {
+      res.cookie("user_id", user.id);
+      return res.redirect("/urls");
+    }
+  }
+  res.status(403);
+  const templateVars = {
+    error: 'Error. User email and password did not match'
+  };
+  res.render("login", templateVars);
 });
 
 app.post("/logout", (req, res) => {
@@ -139,6 +150,7 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const newID = generateRandomString();
+  //If the password or email fields are left empty return a 400 error code
   if (!(req.body['password']) || !(req.body['email'])) {
     res.status(400);
     const templateVars = {
@@ -149,7 +161,7 @@ app.post("/register", (req, res) => {
   const newPassword = req.body['password'];
   const newEmail = req.body['email'];
 
-  if (users && emailExists(newEmail)) {
+  if (users && getUserByEmail(newEmail)) {
     res.status(400);
     const templateVars = {
       error: 'Error. An account already exists with this email address'
