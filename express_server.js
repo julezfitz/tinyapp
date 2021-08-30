@@ -58,6 +58,12 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  //if not logged in, bring user to login page
+  if (!req.cookies["userID"]) {
+    res.status(403);
+    return res.render("login");
+  }
+
   const templateVars = {
     userID: req.cookies["userID"],
     user: whatUser(req.cookies["userID"]),
@@ -67,6 +73,12 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  //if not logged in, bring user to login page
+  if (!req.cookies["userID"]) {
+    res.status(403);
+    return res.render("login");
+  }
+
   const templateVars = {
     user: whatUser(req.cookies["userID"]),
     userID: req.cookies["userID"]
@@ -81,6 +93,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  //if not logged in, bring user to login page
+  if (!req.cookies["userID"]) {
+    res.status(403);
+    return res.render("login");
+  }
+
   const templateVars = {
     userID: req.cookies["userID"],
     shortURL: req.params.shortURL,
