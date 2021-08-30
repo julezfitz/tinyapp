@@ -96,9 +96,15 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL]; //delete the item for which the button was pressed from database
-  res.redirect(`/urls`);
+  // if the user is logged in, allow deletion. Otherwise 403 error and direct to log in page
+  if (req.cookies["userID"]) {
+    const shortURL = req.params.shortURL;
+    delete urlDatabase[shortURL]; //delete the item for which the button was pressed from database
+    res.redirect(`/urls`);
+  } else {
+    res.status(403);
+    res.render("login");
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -118,11 +124,17 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const newLongURL = req.body['change-name']; //gets the new long URL from the form input
-  urlDatabase[shortURL] = { "longURL": newLongURL, "userID": req.cookies["userID"] }; //assigns the new long URL to the exisiting database record for the shortURL
-  console.log(urlDatabase);
-  res.redirect(`/urls`);
+  // if the user is logged in, allow editing. Otherwise 403 error and direct to log in page
+  if (req.cookies["userID"]) {
+    const shortURL = req.params.shortURL;
+    const newLongURL = req.body['change-name']; //gets the new long URL from the form input
+    urlDatabase[shortURL] = { "longURL": newLongURL, "userID": req.cookies["userID"] }; //assigns the new long URL to the exisiting database record for the shortURL
+    console.log(urlDatabase);
+    res.redirect(`/urls`);
+  } else {
+    res.status(403);
+    res.render("login");
+  }
 });
 
 app.post("/urls", (req, res) => {
