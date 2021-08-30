@@ -2,8 +2,14 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+
+const helpers = require('./helpers.js');
+const generateRandomString = helpers.generateRandomString;
+const whatUser = helpers.whatUser;
+const getUserByEmail = helpers.getUserByEmail;
+const urlsByUser = helpers.urlsByUser;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -19,42 +25,6 @@ app.set("view engine", "ejs");
 const urlDatabase = {};
 
 const users = {};
-
-//Generates a random string of 6 characters
-const generateRandomString = function () {
-  let randString = '';
-  const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  while (randString.length < 6) {
-    randString += characters[Math.floor(Math.random() * characters.length)];
-  }
-  return randString;
-};
-
-//Lookup the user object of the user with their userID cookie
-const whatUser = function (userID, database) {
-  const currentUser = database[userID];
-  return currentUser;
-};
-
-//Lookup a user by their email address and return that user object
-const getUserByEmail = function (email, database) {
-  for (const key in database) {
-    if (database[key]["email"] === email) {
-      return database[key];
-    }
-  }
-};
-
-//Lookup urls with a specific userID
-const urlsByUser = function (userID, database) {
-  let URLs = {};
-  for (const key in database) {
-    if (database[key]["userID"] === userID) {
-      URLs[key] = database[key];
-    }
-  }
-  return URLs;
-};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
