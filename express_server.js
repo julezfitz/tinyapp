@@ -9,10 +9,7 @@ app.use(cookieParser());
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+const urlDatabase = {};
 
 const users = {};
 
@@ -41,6 +38,17 @@ const getUserByEmail = function (email) {
   }
 };
 
+//Lookup urls with a specific userID
+const urlsByUser = function (userID) {
+  let URLs = {};
+  for (const key in urlDatabase) {
+    if (urlDatabase[key]["userID"] === userID) {
+      URLs[key] = urlDatabase[key];
+    }
+  }
+  return URLs;
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -62,14 +70,15 @@ app.get("/urls", (req, res) => {
   if (!req.cookies["userID"]) {
     res.status(403);
     return res.render("login");
-  }
+  } else {
 
-  const templateVars = {
-    userID: req.cookies["userID"],
-    user: whatUser(req.cookies["userID"]),
-    urls: urlDatabase
-  };
-  res.render("urls_index", templateVars);
+    const templateVars = {
+      userID: req.cookies["userID"],
+      user: whatUser(req.cookies["userID"]),
+      urls: urlsByUser(req.cookies["userID"])
+    };
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -103,7 +112,7 @@ app.get("/urls/:shortURL", (req, res) => {
     userID: req.cookies["userID"],
     shortURL: req.params.shortURL,
     user: whatUser(req.cookies["userID"]),
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL]["longURL"],
   };
   res.render("urls_show", templateVars);
 });
@@ -111,18 +120,19 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const newLongURL = req.body['change-name']; //gets the new long URL from the form input
-  urlDatabase[shortURL] = newLongURL; //assigns the new long URL to the exisiting database record for the shortURL
+  urlDatabase[shortURL] = { "longURL": newLongURL, "userID": req.cookies["userID"] }; //assigns the new long URL to the exisiting database record for the shortURL
+  console.log(urlDatabase);
   res.redirect(`/urls`);
 });
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); //Generates new tiny url
-  urlDatabase[shortURL] = req.body.longURL; //Adds it to the database
+  urlDatabase[shortURL] = { "longURL": req.body.longURL, "userID": req.cookies["userID"] }; //Adds it to the database
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]; //Looks up long URL from database
+  const longURL = urlDatabase[req.params.shortURL]["longURL"]; //Looks up long URL from database
   res.redirect(longURL);
 });
 
