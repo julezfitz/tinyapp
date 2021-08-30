@@ -31,26 +31,26 @@ const generateRandomString = function () {
 };
 
 //Lookup the user object of the user with their userID cookie
-const whatUser = function (userID) {
-  const currentUser = users[userID];
+const whatUser = function (userID, database) {
+  const currentUser = database[userID];
   return currentUser;
 };
 
 //Lookup a user by their email address and return that user object
-const getUserByEmail = function (email) {
-  for (const key in users) {
-    if (users[key]["email"] === email) {
-      return users[key];
+const getUserByEmail = function (email, database) {
+  for (const key in database) {
+    if (database[key]["email"] === email) {
+      return database[key];
     }
   }
 };
 
 //Lookup urls with a specific userID
-const urlsByUser = function (userID) {
+const urlsByUser = function (userID, database) {
   let URLs = {};
-  for (const key in urlDatabase) {
-    if (urlDatabase[key]["userID"] === userID) {
-      URLs[key] = urlDatabase[key];
+  for (const key in database) {
+    if (database[key]["userID"] === userID) {
+      URLs[key] = database[key];
     }
   }
   return URLs;
@@ -81,8 +81,8 @@ app.get("/urls", (req, res) => {
 
     const templateVars = {
       userID: req.session.user_id,
-      user: whatUser(req.session.user_id),
-      urls: urlsByUser(req.session.user_id)
+      user: whatUser(req.session.user_id, users),
+      urls: urlsByUser(req.session.user_id, urlDatabase)
     };
     res.render("urls_index", templateVars);
   }
@@ -96,7 +96,7 @@ app.get("/urls/new", (req, res) => {
   }
 
   const templateVars = {
-    user: whatUser(req.session.user_id),
+    user: whatUser(req.session.user_id, users),
     userID: req.session.user_id
   };
   res.render("urls_new", templateVars);
@@ -124,7 +124,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     userID: req.session.user_id,
     shortURL: req.params.shortURL,
-    user: whatUser(req.session.user_id),
+    user: whatUser(req.session.user_id, users),
     longURL: urlDatabase[req.params.shortURL]["longURL"],
   };
   res.render("urls_show", templateVars);
@@ -157,7 +157,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.post("/login", (req, res) => {
   const loginEmail = req.body['email'];
-  const user = getUserByEmail(loginEmail);   //Lookup the current user
+  const user = getUserByEmail(loginEmail, users);   //Lookup the current user
   let templateVars;
 
   if (user) {
@@ -188,7 +188,7 @@ app.post("/logout", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = {
     userID: req.session.user_id,
-    user: whatUser(req.session.user_id),
+    user: whatUser(req.session.user_id, users),
   };
   res.render("registration", templateVars);
 });
@@ -206,7 +206,7 @@ app.post("/register", (req, res) => {
   const newPassword = bcrypt.hashSync(req.body['password'], 10);   //hash new password
   const newEmail = req.body['email'];
 
-  if (users && getUserByEmail(newEmail)) {
+  if (users && getUserByEmail(newEmail, users)) {
     res.status(400);
     const templateVars = {
       error: 'Error. An account already exists with this email address'
@@ -227,7 +227,7 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   const templateVars = {
     userID: req.session.user_id,
-    user: whatUser(req.session.user_id),
+    user: whatUser(req.session.user_id, users),
   };
   res.render("login", templateVars);
 });
@@ -235,7 +235,7 @@ app.get("/login", (req, res) => {
 app.get("/home", (req, res) => {
   const templateVars = {
     userID: req.session.user_id,
-    user: whatUser(req.session.user_id),
+    user: whatUser(req.session.user_id, users),
   };
   res.render("home", templateVars);
 });
