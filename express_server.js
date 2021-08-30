@@ -5,12 +5,6 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 
-//Test bcrypt
-const password = "purple-monkey-dinosaur"; // found in the req.params object
-const hashedPassword = bcrypt.hashSync(password, 10);
-console.log(hashedPassword);
-//*************** */
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -162,7 +156,7 @@ app.post("/login", (req, res) => {
 
   if (user) {
     const loginPassword = req.body['password'];
-    if (user.password === loginPassword) {
+    if (bcrypt.compareSync(loginPassword, user.password)) { //Check entered password against stored hashed password
       res.cookie("userID", user.id); //Set cookie to the user's id
       return res.redirect("/urls");
     } else {
@@ -222,7 +216,6 @@ app.post("/register", (req, res) => {
     res.cookie("userID", newID);
     res.redirect("/urls");
   }
-  console.log(`User database: ${users[newID]["password"]}`);
 });
 
 app.get("/login", (req, res) => {
