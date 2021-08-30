@@ -185,3 +185,11 @@ app.get("/login", (req, res) => {
   };
   res.render("login", templateVars);
 });
+
+app.get("/home", (req, res) => {
+  const templateVars = {
+    userID: req.cookies["userID"],
+    user: whatUser(req.cookies["userID"]),
+  };
+  res.render("home", templateVars);
+});
