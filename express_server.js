@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
@@ -31,11 +31,7 @@ const users = {};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+}); //Do I need this???
 
 app.get("/urls", (req, res) => {
   //if not logged in, bring user to login page
@@ -68,11 +64,13 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.delete("/urls/:shortURL", (req, res) => {
-  // if the user is logged in, allow deletion. Otherwise 403 error and direct to login page
+  // if the user is logged in, allow deletion
   if (req.session.user_id) {
     const shortURL = req.params.shortURL;
     delete urlDatabase[shortURL]; //delete the item for which the button was pressed from database
     res.redirect(`/urls`);
+
+    //Otherwise 403 error and direct to login page
   } else {
     res.status(403);
     res.render("login");
@@ -121,15 +119,15 @@ app.put("/urls/:shortURL", (req, res) => {
   } else {
     const shortURL = req.params.shortURL;
     const newLongURL = req.body['change-name']; //gets the new long URL from the form input
-    urlDatabase[shortURL]["longURL"] = newLongURL; //assigns the new long URL to the exisiting database record for the shortURL
+    urlDatabase[shortURL]["longURL"] = newLongURL; //assigns the new long URL to the exisiting database record
     res.redirect(`/urls`);
   }
 
 });
 
-app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString(); //Generates new tiny url
-  urlDatabase[shortURL] = { "longURL": req.body.longURL, "userID": req.session.user_id, "userVisits": [] }; //Adds it to the database
+app.post("/urls", (req, res) => { //Generates new tiny url and adds it to the database
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = { "longURL": req.body.longURL, "userID": req.session.user_id, "userVisits": [] };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -149,7 +147,7 @@ app.post("/login", (req, res) => {
   const user = getUserByEmail(loginEmail, users); //Lookup the current user
   let templateVars;
 
-  if (user) { //If the user exists in the user database check password against stored hashed password
+  if (user) { //If the user exists check password against stored hashed password
     const loginPassword = req.body['password'];
     if (bcrypt.compareSync(loginPassword, user.password)) {
       req.session.user_id = user.id; //Set cookie to the user's id
@@ -189,7 +187,9 @@ app.post("/register", (req, res) => {
   if (!(req.body['password']) || !(req.body['email'])) {
     res.status(400);
     res.render("registration", { error: 'Error. Please enter an email and password' });
-  } else if (users && getUserByEmail(req.body['email'], users)) { //If email already exists return error
+
+    //If email already exists return error
+  } else if (users && getUserByEmail(req.body['email'], users)) {
     res.status(400);
     const templateVars = {
       error: 'Error. An account already exists with this email address'
@@ -206,7 +206,6 @@ app.post("/register", (req, res) => {
     req.session.user_id = newID; //Set cookie to the user's id
     res.redirect("/urls");
   }
-
 });
 
 app.get("/login", (req, res) => {
