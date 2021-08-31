@@ -11,6 +11,7 @@ const generateRandomString = helpers.generateRandomString;
 const whatUser = helpers.whatUser;
 const getUserByEmail = helpers.getUserByEmail;
 const urlsByUser = helpers.urlsByUser;
+const uniqueVisits = helpers.uniqueVisits;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -99,7 +100,8 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     user: whatUser(req.session.user_id, users),
     longURL: urlDatabase[req.params.shortURL]["longURL"],
-    urlDatabase
+    urlDatabase,
+    uniqueVisitCount: uniqueVisits(urlDatabase[req.params.shortURL], urlDatabase),
   };
   res.render("urls_show", templateVars);
 });
@@ -116,6 +118,7 @@ app.put("/urls/:shortURL", (req, res) => {
         user: whatUser(req.session.user_id, users),
         longURL: urlDatabase[req.params.shortURL]["longURL"],
         urlDatabase,
+        uniqueVisitCount: uniqueVisits(urlDatabase[req.params.shortURL], urlDatabase),
         error: 'Please enter a URL'
       };
       res.status(400);

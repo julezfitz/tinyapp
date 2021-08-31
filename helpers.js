@@ -34,9 +34,21 @@ const urlsByUser = function (userID, database) {
   return URLs;
 };
 
+//Counts the number of unique visits to a link using the unique visitor ids
+const uniqueVisits = function (databaseShortURL) {
+  let uniqueVisitorIDs = [];
+  for (let visit in databaseShortURL["userVisits"]) {
+    if (!uniqueVisitorIDs.includes(databaseShortURL["userVisits"][visit]["uniqueVisitorID"])) {
+      uniqueVisitorIDs.push(databaseShortURL["userVisits"][visit]["uniqueVisitorID"]);
+    }
+  }
+  return uniqueVisitorIDs.length;
+};
+
 module.exports = {
   generateRandomString,
   whatUser,
   getUserByEmail,
-  urlsByUser
+  urlsByUser,
+  uniqueVisits
 };

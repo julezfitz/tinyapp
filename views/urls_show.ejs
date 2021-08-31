@@ -42,9 +42,8 @@
     <% if (urlDatabase[shortURL]["userVisits"].length >= 1){ %>
       <div>
         <h5 style="margin-top: 15px; margin-left: 10px;">Access Record</h5>
-        <p style="margin-top: 6px; margin-left: 10px; margin-bottom: 0px; color: black">Total visitors: <%= %></p>
-        <p style="margin-top: 1px; margin-left: 10px; color: black">Total unique visitors: <%= %></p>
-        <p style="margin-top: 1px; margin-left: 10px; color: black">Session access details: <%= %></p>
+        <p style="margin-top: 6px; margin-left: 10px; margin-bottom: 0px; color: black">Total visitors: <%= urlDatabase[shortURL]["userVisits"].length %></p>
+        <p style="margin-top: 1px; margin-left: 10px; color: black">Total unique visitors: <%= uniqueVisitCount %></p>
 
         <table class="table">
           <thead>
