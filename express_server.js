@@ -103,11 +103,27 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   // if the user is logged in, allow editing. Otherwise 403 error and direct to log in page
   if (req.session.user_id) {
-    const shortURL = req.params.shortURL;
-    const newLongURL = req.body['change-name']; //gets the new long URL from the form input
-    urlDatabase[shortURL] = { "longURL": newLongURL, "userID": req.session.user_id }; //assigns the new long URL to the exisiting database record for the shortURL
-    console.log(urlDatabase);
-    res.redirect(`/urls`);
+
+    //check to ensure a long url is input. Return an error if not
+    if (!req.body['change-name']) {
+      const templateVars = {
+        userID: req.session.user_id,
+        shortURL: req.params.shortURL,
+        user: whatUser(req.session.user_id, users),
+        longURL: urlDatabase[req.params.shortURL]["longURL"],
+        error: 'Please enter a URL'
+      };
+      res.status(400);
+      res.render("urls_show", templateVars);
+
+    } else {
+      const shortURL = req.params.shortURL;
+      const newLongURL = req.body['change-name']; //gets the new long URL from the form input
+      urlDatabase[shortURL] = { "longURL": newLongURL, "userID": req.session.user_id }; //assigns the new long URL to the exisiting database record for the shortURL
+      console.log(urlDatabase);
+      res.redirect(`/urls`);
+    }
+    
   } else {
     res.status(403);
     res.render("login");
