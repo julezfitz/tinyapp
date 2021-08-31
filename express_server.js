@@ -20,7 +20,6 @@ app.use(methodOverride('_method'));
 app.use(cookieSession({
   name: 'session',
   keys: ['xFr54$gdEW13v78'],
-  // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
@@ -30,20 +29,12 @@ const urlDatabase = {};
 
 const users = {};
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.get("/urls", (req, res) => {
@@ -77,7 +68,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.delete("/urls/:shortURL", (req, res) => {
-  // if the user is logged in, allow deletion. Otherwise 403 error and direct to log in page
+  // if the user is logged in, allow deletion. Otherwise 403 error and direct to login page
   if (req.session.user_id) {
     const shortURL = req.params.shortURL;
     delete urlDatabase[shortURL]; //delete the item for which the button was pressed from database
@@ -128,7 +119,6 @@ app.put("/urls/:shortURL", (req, res) => {
       const shortURL = req.params.shortURL;
       const newLongURL = req.body['change-name']; //gets the new long URL from the form input
       urlDatabase[shortURL]["longURL"] = newLongURL; //assigns the new long URL to the exisiting database record for the shortURL
-      console.log(urlDatabase);
       res.redirect(`/urls`);
     }
 
@@ -157,7 +147,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.post("/login", (req, res) => {
   const loginEmail = req.body['email'];
-  const user = getUserByEmail(loginEmail, users);   //Lookup the current user
+  const user = getUserByEmail(loginEmail, users); //Lookup the current user
   let templateVars;
 
   if (user) {
