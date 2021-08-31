@@ -99,6 +99,7 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     user: whatUser(req.session.user_id, users),
     longURL: urlDatabase[req.params.shortURL]["longURL"],
+    urlDatabase
   };
   res.render("urls_show", templateVars);
 });
@@ -114,6 +115,7 @@ app.put("/urls/:shortURL", (req, res) => {
         shortURL: req.params.shortURL,
         user: whatUser(req.session.user_id, users),
         longURL: urlDatabase[req.params.shortURL]["longURL"],
+        urlDatabase,
         error: 'Please enter a URL'
       };
       res.status(400);
@@ -122,7 +124,7 @@ app.put("/urls/:shortURL", (req, res) => {
     } else {
       const shortURL = req.params.shortURL;
       const newLongURL = req.body['change-name']; //gets the new long URL from the form input
-      urlDatabase[shortURL] = { "longURL": newLongURL, "userID": req.session.user_id }; //assigns the new long URL to the exisiting database record for the shortURL
+      urlDatabase[shortURL]["longURL"] = newLongURL; //assigns the new long URL to the exisiting database record for the shortURL
       console.log(urlDatabase);
       res.redirect(`/urls`);
     }
@@ -135,11 +137,17 @@ app.put("/urls/:shortURL", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); //Generates new tiny url
-  urlDatabase[shortURL] = { "longURL": req.body.longURL, "userID": req.session.user_id }; //Adds it to the database
+  urlDatabase[shortURL] = { "longURL": req.body.longURL, "userID": req.session.user_id, "userVisits": [] }; //Adds it to the database
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  if (!req.session.uniqueVisitorID) { //Set a unique visitor ID to the URL if one does not exist
+    req.session.uniqueVisitorID = generateRandomString();
+  }
+  const userVisit = { "timeStamp": new Date(), "uniqueVisitorID": req.session.uniqueVisitorID }; //Create a record of the link access details
+  urlDatabase[req.params.shortURL]["userVisits"].push(userVisit);
+
   const longURL = urlDatabase[req.params.shortURL]["longURL"]; //Looks up long URL from database
   res.redirect(longURL);
 });
