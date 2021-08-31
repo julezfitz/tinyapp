@@ -4,6 +4,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const methodOverride = require('method-override');
 
 const helpers = require('./helpers.js');
 const generateRandomString = helpers.generateRandomString;
@@ -12,6 +13,8 @@ const getUserByEmail = helpers.getUserByEmail;
 const urlsByUser = helpers.urlsByUser;
 
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(methodOverride('_method'));
 
 app.use(cookieSession({
   name: 'session',
@@ -72,7 +75,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
   // if the user is logged in, allow deletion. Otherwise 403 error and direct to log in page
   if (req.session.user_id) {
     const shortURL = req.params.shortURL;
@@ -100,7 +103,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.post("/urls/:shortURL", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
   // if the user is logged in, allow editing. Otherwise 403 error and direct to log in page
   if (req.session.user_id) {
 
@@ -123,7 +126,7 @@ app.post("/urls/:shortURL", (req, res) => {
       console.log(urlDatabase);
       res.redirect(`/urls`);
     }
-    
+
   } else {
     res.status(403);
     res.render("login");

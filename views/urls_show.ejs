@@ -22,7 +22,7 @@
       <h2>Edit</h2>
       <div class="container-fluid">
         <div class="row justify-content-center">
-          <form class="form-inline" action="/urls/<%= shortURL %>" method="POST">
+          <form class="form-inline" action="/urls/<%= shortURL %>?_method=PUT" method="POST">
         <label class= "col-form-label col-form-label-lg" style="padding:10px" >New URL:</label>
         <input type="text" name = "change-name" class="form-control" style="padding:10px" value=<%= longURL %>>
         <button class = "btn btn-primary" style="margin-left:10px; margin-top: 10px">Submit</button>
