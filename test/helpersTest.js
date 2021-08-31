@@ -3,7 +3,7 @@ const { assert } = require('chai');
 const { getUserByEmail } = require('../helpers.js');
 const { urlsByUser } = require('../helpers.js');
 const { whatUser } = require('../helpers.js');
-
+const { uniqueVisits } = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
@@ -19,7 +19,7 @@ const testUsers = {
 };
 
 const testURLDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW", "userVisits": [{ "timeStamp": 1630430773646, "uniqueVisitorID": "zB1234" }, { "timeStamp": 1670430773646, "uniqueVisitorID": "zB1234" }, { "timeStamp": 166030773646, "uniqueVisitorID": "bAr453" }] },
   djwhsN: { longURL: "https://www.amazon.ca", userID: "b4sGHe" },
   Wy4cFs: { longURL: "https://www.gov.gc.ca", userID: "b4sGHe" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
@@ -42,12 +42,12 @@ describe('urlsByUser', function () {
   it('should return URLs associated with a specific user', function () {
     const urls = urlsByUser("aJ48lW", testURLDatabase);
     const expectedOutput = {
-      b6UTxQ: { longURL: 'https://www.tsn.ca', userID: 'aJ48lW' },
+      b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW", "userVisits": [{ "timeStamp": 1630430773646, "uniqueVisitorID": "zB1234" }, { "timeStamp": 1670430773646, "uniqueVisitorID": "zB1234" }, { "timeStamp": 166030773646, "uniqueVisitorID": "bAr453" }] },
       i3BoGr: { longURL: 'https://www.google.ca', userID: 'aJ48lW' }
     };
     assert.deepEqual(urls, expectedOutput);
   });
-  it('should return an empy object if no URLs exist for that user', function () {
+  it('should return an empty object if no URLs exist for that user', function () {
     const urls = urlsByUser("gdj43s", testURLDatabase);
     const expectedOutput = {};
     assert.deepEqual(urls, expectedOutput);
@@ -74,5 +74,13 @@ describe('whatUser', function () {
     const user = whatUser("userFakeID", testUsers);
     const expectedOutput = undefined;
     assert.strictEqual(user, expectedOutput);
+  });
+});
+
+describe('uniqueVisits', function () {
+  it('should return the number of times a specific request was made by unique users', function () {
+    const uniqueVisitCount = uniqueVisits(testURLDatabase.b6UTxQ);
+    const expectedOutput = 2;
+    assert.strictEqual(uniqueVisitCount, expectedOutput);
   });
 });

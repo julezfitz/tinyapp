@@ -118,7 +118,7 @@ app.put("/urls/:shortURL", (req, res) => {
         user: whatUser(req.session.user_id, users),
         longURL: urlDatabase[req.params.shortURL]["longURL"],
         urlDatabase,
-        uniqueVisitCount: uniqueVisits(urlDatabase[req.params.shortURL], urlDatabase),
+        uniqueVisitCount: uniqueVisits(urlDatabase[req.params.shortURL]),
         error: 'Please enter a URL'
       };
       res.status(400);
