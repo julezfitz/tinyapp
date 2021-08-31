@@ -54,7 +54,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  //if not logged in, bring user to login page
+  //If the user is not logged in, send 403 error and direct to log in page
   if (!req.session.user_id) {
     res.status(403);
     return res.render("login");
@@ -80,7 +80,7 @@ app.delete("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  //if not logged in, bring user to login page
+  //If the user is not logged in, send 403 error and direct to log in page
   if (!req.session.user_id) {
     res.status(403);
     return res.render("login");
@@ -98,34 +98,33 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.put("/urls/:shortURL", (req, res) => {
-  // if the user is logged in, allow editing. Otherwise 403 error and direct to log in page
-  if (req.session.user_id) {
+  //If the user is not logged in, send 403 error and direct to log in page
+  if (!req.session.user_id) {
+    res.status(403);
+    return res.render("login");
+  }
 
-    //check to ensure a long url is input. Return an error if not
-    if (!req.body['change-name']) {
-      const templateVars = {
-        userID: req.session.user_id,
-        shortURL: req.params.shortURL,
-        user: whatUser(req.session.user_id, users),
-        longURL: urlDatabase[req.params.shortURL]["longURL"],
-        urlDatabase,
-        uniqueVisitCount: uniqueVisits(urlDatabase[req.params.shortURL]),
-        error: 'Please enter a URL'
-      };
-      res.status(400);
-      res.render("urls_show", templateVars);
-
-    } else {
-      const shortURL = req.params.shortURL;
-      const newLongURL = req.body['change-name']; //gets the new long URL from the form input
-      urlDatabase[shortURL]["longURL"] = newLongURL; //assigns the new long URL to the exisiting database record for the shortURL
-      res.redirect(`/urls`);
-    }
+  //Check to ensure a long url is input. Return an error if not
+  if (!req.body['change-name']) {
+    const templateVars = {
+      userID: req.session.user_id,
+      shortURL: req.params.shortURL,
+      user: whatUser(req.session.user_id, users),
+      longURL: urlDatabase[req.params.shortURL]["longURL"],
+      urlDatabase,
+      uniqueVisitCount: uniqueVisits(urlDatabase[req.params.shortURL]),
+      error: 'Please enter a URL'
+    };
+    res.status(400);
+    res.render("urls_show", templateVars);
 
   } else {
-    res.status(403);
-    res.render("login");
+    const shortURL = req.params.shortURL;
+    const newLongURL = req.body['change-name']; //gets the new long URL from the form input
+    urlDatabase[shortURL]["longURL"] = newLongURL; //assigns the new long URL to the exisiting database record for the shortURL
+    res.redirect(`/urls`);
   }
+
 });
 
 app.post("/urls", (req, res) => {
@@ -150,9 +149,9 @@ app.post("/login", (req, res) => {
   const user = getUserByEmail(loginEmail, users); //Lookup the current user
   let templateVars;
 
-  if (user) {
+  if (user) { //If the user exists in the user database check password against stored hashed password
     const loginPassword = req.body['password'];
-    if (bcrypt.compareSync(loginPassword, user.password)) { //Check entered password against stored hashed password
+    if (bcrypt.compareSync(loginPassword, user.password)) {
       req.session.user_id = user.id; //Set cookie to the user's id
       return res.redirect("/urls");
     } else {
@@ -185,18 +184,12 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const newID = generateRandomString();
+
   //If the password or email fields are left empty return a 400 error code
   if (!(req.body['password']) || !(req.body['email'])) {
     res.status(400);
-    const templateVars = {
-      error: 'Error. Please enter an email and password'
-    };
-    res.render("registration", templateVars);
-  }
-  const newPassword = bcrypt.hashSync(req.body['password'], 10);   //hash new password
-  const newEmail = req.body['email'];
-
-  if (users && getUserByEmail(newEmail, users)) {
+    res.render("registration", { error: 'Error. Please enter an email and password' });
+  } else if (users && getUserByEmail(req.body['email'], users)) { //If email already exists return error
     res.status(400);
     const templateVars = {
       error: 'Error. An account already exists with this email address'
@@ -204,14 +197,16 @@ app.post("/register", (req, res) => {
     res.render("registration", templateVars);
   } else {
 
+    //Otherwise, create new user
     users[newID] = {
       "id": newID,
-      "email": newEmail,
-      "password": newPassword
+      "email": req.body['email'],
+      "password": bcrypt.hashSync(req.body['password'], 10)   //hash new password
     };
     req.session.user_id = newID; //Set cookie to the user's id
     res.redirect("/urls");
   }
+
 });
 
 app.get("/login", (req, res) => {

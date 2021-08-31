@@ -55,12 +55,8 @@
           <tbody>
             <% for(let visit in urlDatabase[shortURL]["userVisits"]) {%>
               <tr>
-                <td>
-                  <%= urlDatabase[shortURL]["userVisits"][visit]["timeStamp"] %>
-                </td>
-                <td>
-                  <%= urlDatabase[shortURL]["userVisits"][visit]["uniqueVisitorID"] %>
-                </td>
+                <td><%= urlDatabase[shortURL]["userVisits"][visit]["timeStamp"] %></td>
+                <td><%= urlDatabase[shortURL]["userVisits"][visit]["uniqueVisitorID"] %></td>
               </tr>
               <% } %>
           </tbody>
