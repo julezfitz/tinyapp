@@ -134,7 +134,7 @@ app.get("/u/:shortURL", (req, res) => {
   let uniqueVisitorID = req.cookies.uniqueVisitorID;
   if (!uniqueVisitorID) { //Set a unique visitor ID to the URL visitor if one does not exist
     uniqueVisitorID = generateRandomString();
-    res.cookie('uniqueVisitorID', uniqueVisitorID, {maxAge: 365 * 24 * 60 * 60 * 1000});
+    res.cookie('uniqueVisitorID', uniqueVisitorID, { maxAge: 365 * 24 * 60 * 60 * 1000 });
   }
   const userVisit = { "timeStamp": new Date(), "uniqueVisitorID": uniqueVisitorID }; //Create a record of the link access details
   urlDatabase[req.params.shortURL]["userVisits"].push(userVisit);
@@ -150,20 +150,21 @@ app.post("/login", (req, res) => {
 
   if (user) { //If the user exists check password against stored hashed password
     const loginPassword = req.body['password'];
+
+    //If username and password are correct
     if (bcrypt.compareSync(loginPassword, user.password)) {
       req.session.user_id = user.id; //Set cookie to the user's id
       return res.redirect("/urls");
     } else {
       res.status(403);
-      templateVars = {
-        error: 'Error. Incorrect password'
-      };
+      templateVars = {error: 'Error. Incorrect password'};
     }
+  } else if (!loginEmail) {
+    res.status(403);
+    templateVars = {error: 'Error. Please enter an email address'};
   } else {
     res.status(403);
-    templateVars = {
-      error: 'Error. An account with this email does not exist'
-    };
+    templateVars = {error: 'Error. No TinyApp account'};
   }
   res.render("login", templateVars); //render the login page with the error message
 });
