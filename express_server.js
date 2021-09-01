@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const methodOverride = require('method-override');
+const cookieParser = require("cookie-parser");
 
 const helpers = require('./helpers.js');
 const generateRandomString = helpers.generateRandomString;
@@ -17,6 +18,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(methodOverride('_method'));
 
+app.use(cookieParser());
+
 app.use(cookieSession({
   name: 'session',
   keys: ['xFr54$gdEW13v78'],
@@ -28,10 +31,6 @@ app.set("view engine", "ejs");
 const urlDatabase = {};
 
 const users = {};
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-}); //Do I need this???
 
 app.get("/urls", (req, res) => {
   //if not logged in, bring user to login page
@@ -132,10 +131,12 @@ app.post("/urls", (req, res) => { //Generates new tiny url and adds it to the da
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  if (!req.session.uniqueVisitorID) { //Set a unique visitor ID to the URL if one does not exist
-    req.session.uniqueVisitorID = generateRandomString();
+  let uniqueVisitorID = req.cookies.uniqueVisitorID;
+  if (!uniqueVisitorID) { //Set a unique visitor ID to the URL visitor if one does not exist
+    uniqueVisitorID = generateRandomString();
+    res.cookie('uniqueVisitorID', uniqueVisitorID, {maxAge: 365 * 24 * 60 * 60 * 1000});
   }
-  const userVisit = { "timeStamp": new Date(), "uniqueVisitorID": req.session.uniqueVisitorID }; //Create a record of the link access details
+  const userVisit = { "timeStamp": new Date(), "uniqueVisitorID": uniqueVisitorID }; //Create a record of the link access details
   urlDatabase[req.params.shortURL]["userVisits"].push(userVisit);
 
   const longURL = urlDatabase[req.params.shortURL]["longURL"]; //Looks up long URL from database
@@ -222,4 +223,8 @@ app.get("/home", (req, res) => {
     user: whatUser(req.session.user_id, users),
   };
   res.render("home", templateVars);
+});
+
+app.listen(PORT, () => {
+  console.log(`TinyApp listening on port ${PORT}!`);
 });
