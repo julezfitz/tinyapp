@@ -19,3 +19,9 @@ TinyApp includes URL access analytics, which allows you to view the use statisti
 ![TinyApp my URLs list view](images/TinyApp5.png)
 ![TinyApp URL access analytics](images/TinyApp6.png)
 
+## Getting Set Up
+To try TinyApp yourself, please follow the steps below:
+- Clone the repository
+- Run npm install
+- Enter "node express_server.js" in your command line
+- Open a browser and go to "http://localhost:8080/home" 
